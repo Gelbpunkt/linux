@@ -189,4 +189,37 @@ extern int cvmx_helper_get_interface_num(int ipd_port);
  */
 extern int cvmx_helper_get_interface_index_num(int ipd_port);
 
+struct cvmx_xiface {
+        int node;
+        int interface;
+};
+typedef struct cvmx_xiface cvmx_xiface_t;
+
+
+
+/**
+ * Return node and interface number from XIFACE.
+ *
+ * @param xiface interface with node information
+ *
+ * @return struct that contains node and interface number.
+ */
+static inline struct cvmx_xiface cvmx_helper_xiface_to_node_interface(int xiface)
+{
+        cvmx_xiface_t interface_node;
+        /*
+         * If the majic number 0xde0000 is not present in the
+         * interface, then assume it is node 0.
+         */
+
+        if (((xiface >> 0x8) & 0xff) == 0xde) {
+                interface_node.node = (xiface >> 16) & CVMX_NODE_MASK;
+                interface_node.interface = xiface & 0xff;
+        } else {
+                interface_node.node = cvmx_get_node_num();
+                interface_node.interface = xiface & 0xff;
+        }
+        return interface_node;
+}
+
 #endif /* __CVMX_HELPER_H__ */

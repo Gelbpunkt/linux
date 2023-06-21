@@ -23,6 +23,7 @@
 #include <asm/octeon/cvmx-fau.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-helper.h>
+#include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-ipd-defs.h>

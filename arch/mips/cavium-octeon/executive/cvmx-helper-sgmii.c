@@ -40,6 +40,8 @@
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-pcsx-defs.h>
 #include <asm/octeon/cvmx-pcsxx-defs.h>
+#include <asm/octeon/cvmx-helper-cfg.h>
+
 
 /**
  * Perform initialization required only once for an SGMII port.
@@ -68,6 +70,17 @@ static int __cvmx_helper_sgmii_hardware_init_one_time(int interface, int index)
 	 */
 	pcs_misc_ctl_reg.u64 =
 	    cvmx_read_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface));
+
+	/* Adjust the MAC mode if requested by device tree */
+	pcs_misc_ctl_reg.s.mac_phy =
+		cvmx_helper_get_mac_phy_mode(interface, index);
+	pcs_misc_ctl_reg.s.mode =
+		cvmx_helper_get_1000x_mode(interface, index);
+	cvmx_write_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface),
+		       pcs_misc_ctl_reg.u64);
+
+
+
 	pcsx_linkx_timer_count_reg.u64 =
 	    cvmx_read_csr(CVMX_PCSX_LINKX_TIMER_COUNT_REG(index, interface));
 	if (pcs_misc_ctl_reg.s.mode) {
@@ -94,6 +107,7 @@ static int __cvmx_helper_sgmii_hardware_init_one_time(int interface, int index)
 	if (pcs_misc_ctl_reg.s.mode) {
 		/* 1000BASE-X */
 		union cvmx_pcsx_anx_adv_reg pcsx_anx_adv_reg;
+		pr_err("__cvmx_helper_sgmii_hardware_init_one_time, interface %d/%d, protocol 1000BASE-X\n", interface, index);
 		pcsx_anx_adv_reg.u64 =
 		    cvmx_read_csr(CVMX_PCSX_ANX_ADV_REG(index, interface));
 		pcsx_anx_adv_reg.s.rem_flt = 0;
@@ -103,12 +117,10 @@ static int __cvmx_helper_sgmii_hardware_init_one_time(int interface, int index)
 		cvmx_write_csr(CVMX_PCSX_ANX_ADV_REG(index, interface),
 			       pcsx_anx_adv_reg.u64);
 	} else {
-		union cvmx_pcsx_miscx_ctl_reg pcsx_miscx_ctl_reg;
-		pcsx_miscx_ctl_reg.u64 =
-		    cvmx_read_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface));
-		if (pcsx_miscx_ctl_reg.s.mac_phy) {
+		if (pcs_misc_ctl_reg.s.mac_phy) {
 			/* PHY Mode */
 			union cvmx_pcsx_sgmx_an_adv_reg pcsx_sgmx_an_adv_reg;
+		  pr_err("__cvmx_helper_sgmii_hardware_init_one_time, interface %d/%d, protocol SGMII, PHY mode\n", interface, index);
 			pcsx_sgmx_an_adv_reg.u64 =
 			    cvmx_read_csr(CVMX_PCSX_SGMX_AN_ADV_REG
 					  (index, interface));
@@ -120,6 +132,7 @@ static int __cvmx_helper_sgmii_hardware_init_one_time(int interface, int index)
 				       pcsx_sgmx_an_adv_reg.u64);
 		} else {
 			/* MAC Mode - Nothing to do */
+		  pr_err("__cvmx_helper_sgmii_hardware_init_one_time, interface %d/%d, protocol SGMII, MAC mode\n", interface, index);
 		}
 	}
 	return 0;
@@ -424,71 +437,17 @@ union cvmx_helper_link_info __cvmx_helper_sgmii_link_get(int ipd_port)
 
 	pcs_misc_ctl_reg.u64 =
 	    cvmx_read_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface));
-	if (pcs_misc_ctl_reg.s.mode) {
-		/* 1000BASE-X */
-		/* FIXME */
+	if (pcs_misc_ctl_reg.s.mac_phy ||
+	    cvmx_helper_get_port_force_link_up(interface, index)) {
+		/* PHY Mode */
+		/* Note that this also works for 1000base-X mode */
+		result.s.speed = 1000;
+		result.s.full_duplex = 1;
+		result.s.link_up = 1;
+		return result;
 	} else {
-		union cvmx_pcsx_miscx_ctl_reg pcsx_miscx_ctl_reg;
-		pcsx_miscx_ctl_reg.u64 =
-		    cvmx_read_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface));
-		if (pcsx_miscx_ctl_reg.s.mac_phy) {
-			/* PHY Mode */
-			union cvmx_pcsx_mrx_status_reg pcsx_mrx_status_reg;
-			union cvmx_pcsx_anx_results_reg pcsx_anx_results_reg;
-
-			/*
-			 * Don't bother continuing if the SERTES low
-			 * level link is down
-			 */
-			pcsx_mrx_status_reg.u64 =
-			    cvmx_read_csr(CVMX_PCSX_MRX_STATUS_REG
-					  (index, interface));
-			if (pcsx_mrx_status_reg.s.lnk_st == 0) {
-				if (__cvmx_helper_sgmii_hardware_init_link
-				    (interface, index) != 0)
-					return result;
-			}
-
-			/* Read the autoneg results */
-			pcsx_anx_results_reg.u64 =
-			    cvmx_read_csr(CVMX_PCSX_ANX_RESULTS_REG
-					  (index, interface));
-			if (pcsx_anx_results_reg.s.an_cpt) {
-				/*
-				 * Auto negotiation is complete. Set
-				 * status accordingly.
-				 */
-				result.s.full_duplex =
-				    pcsx_anx_results_reg.s.dup;
-				result.s.link_up =
-				    pcsx_anx_results_reg.s.link_ok;
-				switch (pcsx_anx_results_reg.s.spd) {
-				case 0:
-					result.s.speed = 10;
-					break;
-				case 1:
-					result.s.speed = 100;
-					break;
-				case 2:
-					result.s.speed = 1000;
-					break;
-				default:
-					result.s.speed = 0;
-					result.s.link_up = 0;
-					break;
-				}
-			} else {
-				/*
-				 * Auto negotiation isn't
-				 * complete. Return link down.
-				 */
-				result.s.speed = 0;
-				result.s.link_up = 0;
-			}
-		} else {	/* MAC Mode */
-
-			result = __cvmx_helper_board_link_get(ipd_port);
-		}
+		/* MAC Mode */
+		result = __cvmx_helper_board_link_get(ipd_port);
 	}
 	return result;
 }

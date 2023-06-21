@@ -487,7 +487,13 @@ int cvm_oct_common_open(struct net_device *dev,
 			netif_carrier_off(dev);
 		cvm_oct_adjust_link(dev);
 	} else {
+#if 0
 		link_info = cvmx_helper_link_get(priv->port);
+#else
+    link_info.s.link_up = 1;
+    link_info.s.full_duplex = 1;
+    link_info.s.speed = 1000;
+#endif
 		if (!link_info.s.link_up)
 			netif_carrier_off(dev);
 		priv->poll = link_poll;
@@ -502,7 +508,13 @@ void cvm_oct_link_poll(struct net_device *dev)
 	struct octeon_ethernet *priv = netdev_priv(dev);
 	union cvmx_helper_link_info link_info;
 
+#if 0
 	link_info = cvmx_helper_link_get(priv->port);
+#endif
+  link_info.s.link_up = 1;
+  link_info.s.full_duplex = 1;
+  link_info.s.speed = 1000;
+
 	if (link_info.u64 == priv->link_info)
 		return;
 
@@ -677,6 +689,67 @@ static void cvm_set_rgmii_delay(struct octeon_ethernet *priv, int iface,
 		priv->phy_mode = PHY_INTERFACE_MODE_RGMII;
 }
 
+static int cvm_oct_get_port_status(struct device_node *pip)
+{
+	int i, j;
+	int num_interfaces = cvmx_helper_get_number_of_interfaces();
+
+  pr_info("cvm_oct_get_port_status running over %d interfaces\n", num_interfaces);
+	for (i = 0; i < num_interfaces; i++) {
+		int num_ports = cvmx_helper_ports_on_interface(i);
+		int mode = cvmx_helper_interface_get_mode(i);
+		struct device_node *port_node;
+
+    pr_info("cvm_oct_get_port_status interface %d, #ports = %d\n", i, num_ports);
+		for (j = 0; j < num_ports; j++) {
+			port_node = cvm_oct_node_for_port(pip, i, j);
+      pr_info("cvm_oct_get_port_status %d/%d, mode = %d, port_node = %d\n", i, j, mode, !!port_node);
+			switch (mode) {
+			case CVMX_HELPER_INTERFACE_MODE_RGMII:
+			case CVMX_HELPER_INTERFACE_MODE_GMII:
+			case CVMX_HELPER_INTERFACE_MODE_XAUI:
+			case CVMX_HELPER_INTERFACE_MODE_SPI:
+				if (port_node)
+					cvmx_helper_set_port_valid(i, j, true);
+				else
+					cvmx_helper_set_port_valid(i, j, false);
+				cvmx_helper_set_mac_phy_mode(i, j, false);
+				cvmx_helper_set_1000x_mode(i, j, false);
+				break;
+			case CVMX_HELPER_INTERFACE_MODE_SGMII:
+			{
+				if (port_node != NULL)
+					cvmx_helper_set_port_valid(i, j, true);
+				else
+					cvmx_helper_set_port_valid(i, j, false);
+				cvmx_helper_set_mac_phy_mode(i, j, false);
+				cvmx_helper_set_1000x_mode(i, j, false);
+				if (port_node) {
+					if (of_get_property(port_node,
+					     "cavium,sgmii-mac-phy-mode", NULL) != NULL) {
+            pr_info("sgmii-mac-phy-mode found, setting..\n");
+						cvmx_helper_set_mac_phy_mode(i, j, true);
+          }
+					if (of_get_property(port_node,
+					    "cavium,sgmii-mac-1000x-mode", NULL)
+					    != NULL) {
+            pr_info("sgmii-mac-1000x-mode found setting..\n");
+						cvmx_helper_set_1000x_mode(i, j, true);
+          }
+				}
+				break;
+			}
+			default:
+				cvmx_helper_set_port_valid(i, j, true);
+				cvmx_helper_set_mac_phy_mode(i, j, false);
+				cvmx_helper_set_1000x_mode(i, j, false);
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
 static int cvm_oct_probe(struct platform_device *pdev)
 {
 	int num_interfaces;
@@ -700,6 +773,8 @@ static int cvm_oct_probe(struct platform_device *pdev)
 	cvm_oct_configure_common_hw();
 
 	cvmx_helper_initialize_packet_io_global();
+
+	cvm_oct_get_port_status(pip);
 
 	if (receive_group_order) {
 		if (receive_group_order > 4)

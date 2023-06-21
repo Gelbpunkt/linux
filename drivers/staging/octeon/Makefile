@@ -9,6 +9,8 @@
 
 obj-${CONFIG_OCTEON_ETHERNET} :=  octeon-ethernet.o
 
+ccflags-y += -DDEBUG
+
 octeon-ethernet-y := ethernet.o
 octeon-ethernet-y += ethernet-mdio.o
 octeon-ethernet-y += ethernet-mem.o
