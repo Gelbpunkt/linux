@@ -44,10 +44,10 @@ static int n821_cpld_psu_read(struct device *dev,
 
   if (channel == 0) {
     busbar = (value & 0x8) != 0;
-    fault = (value & 0x2) != 0;
+    fault = (value & 0x2) == 0;
   } else if (channel == 1) {
     busbar = (value & 0x4) != 0;
-    fault = (value & 0x1) != 0;
+    fault = (value & 0x1) == 0;
   } else {
     return -EINVAL;
   }
