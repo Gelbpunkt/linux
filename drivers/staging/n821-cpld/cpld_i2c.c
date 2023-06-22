@@ -77,8 +77,9 @@ static int n821_cpld_i2c_xfer_polling(struct i2c_adapter *adap,
     {
       int sleep;
       int status = 0;
-      for (sleep = 10; sleep > 0; sleep--) {
+      for (sleep = 100; sleep > 0; sleep--) {
         regmap_read(i2c->regmap, 0x1, &status);
+        status &= 0x3f;
         if ((status & 0x2) != 0) {
           break;
         }
@@ -86,7 +87,6 @@ static int n821_cpld_i2c_xfer_polling(struct i2c_adapter *adap,
       }
       if (status & 0x8) {
         // NACK
-        dev_err(i2c->dev, "i2c xfer: id %d; addr: 0x%02x; NACK\n", count, msgs->addr);
         return -EIO;
       }
       if (sleep == 0) {
