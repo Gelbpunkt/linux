@@ -100,7 +100,7 @@ static int n821_cpld_psu_probe(struct platform_device *pdev)
     return PTR_ERR(psu->regmap);
   }
 
-  psu->offset = N821_CPLD_REG_PWR_STATUS;
+  psu->offset = N821_CPLD_REG_PWR_TEST;
   hwmon_dev = devm_hwmon_device_register_with_info(&pdev->dev,
       "n821_psu", psu, &n821_cpld_psu_chip_info, NULL);
   if (IS_ERR(hwmon_dev))
