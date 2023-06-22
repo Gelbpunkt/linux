@@ -88,8 +88,8 @@ static int n821_cpld_probe(struct platform_device *pdev)
 
   regmap = syscon_node_to_regmap(dev->of_node);
   if (IS_ERR(regmap)) {
-    dev_err(dev, "cannot get regmap\n");
-    return PTR_ERR(regmap);
+    dev_info(dev, "cannot get regmap, try again later\n");
+    return -EPROBE_DEFER;
   }
 
   irq = irq_of_parse_and_map(dev->of_node, 0);
