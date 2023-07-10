@@ -167,6 +167,18 @@ config MFD_ATMEL_HLCDC
 	  additional drivers must be enabled in order to use the
 	  functionality of the device.
 
+config CISCO_N821_CPLD
+	tristate "Cisco 821 CPLD support"
+	depends on CAVIUM_OCTEON_SOC || COMPILE_TEST
+	select MFD_CORE
+	select MFD_SYSCON
+	select REGMAP_IRQ
+	help
+	  If you select Y here you get support for the Cisco N821 CPLD.
+
+	  To compile this driver as a module, choose M here.  The module
+	  will be called cisco-n821-cpld.
+
 config MFD_ATMEL_SMC
 	bool
 	select MFD_SYSCON
