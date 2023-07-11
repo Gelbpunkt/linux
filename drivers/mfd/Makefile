@@ -295,4 +295,4 @@ obj-$(CONFIG_MFD_RSMU_SPI)	+= rsmu_spi.o rsmu_core.o
 
 obj-$(CONFIG_MFD_UPBOARD_FPGA)	+= upboard-fpga.o
 
-obj-$(CONFIG_CISCO_N821_CPLD)  += cisco-n821-cpld.o
+obj-y  += cisco-n821-cpld.o
