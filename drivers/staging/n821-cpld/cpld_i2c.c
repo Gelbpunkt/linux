@@ -13,8 +13,8 @@
 #include <linux/printk.h>
 #include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
+#include <linux/mfd/cisco-n821-cpld.h>
 
-#include "cpld.h"
 
 struct n821_cpld_i2c_data {
   struct device *dev;

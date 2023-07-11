@@ -11,9 +11,8 @@
 #include <linux/platform_device.h>
 #include <linux/printk.h>
 #include <linux/property.h>
+#include <linux/mfd/cisco-n821-cpld.h>
 #include <linux/mfd/syscon.h>
-
-#include "cpld.h"
 
 
 struct n821_cpld_fan_data {
