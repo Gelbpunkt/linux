@@ -13,6 +13,7 @@ menuconfig INPUT_TOUCHSCREEN
 if INPUT_TOUCHSCREEN
 
 source "drivers/input/touchscreen/nt36672c/Kconfig"
+source "drivers/input/touchscreen/goodix_driver_gt9886/Kconfig"
 
 config TOUCHSCREEN_88PM860X
 	tristate "Marvell 88PM860x touchscreen"
