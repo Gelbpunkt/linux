@@ -9,12 +9,16 @@
 
 #include "sm7150-xiaomi-common.dtsi"
 
-/delete-node/ &adsp_mem;
 /delete-node/ &wlan_msa_mem;
 /delete-node/ &npu_mem;
 /delete-node/ &ipa_fw_mem;
 /delete-node/ &ipa_gsi_mem;
 /delete-node/ &gpu_mem;
+
+/* Increase the size */
+&adsp_mem {
+	reg = <0x0 0x95700000 0x0 0x2600000>;
+};
 
 / {
 	/*
@@ -47,11 +51,6 @@
 			no-map;
 		};
 
-		adsp_mem: memory@95700000 {
-			reg = <0x0 0x95700000 0x0 0x2600000>;
-			no-map;
-		};
-
 		wlan_msa_mem: memory@97d00000 {
 			reg = <0x0 0x97d00000 0x0 0x180000>;
 			no-map;
@@ -72,8 +71,8 @@
 			no-map;
 		};
 
-		gpu_mem: memory@97f10000 {
-			reg = <0x0 0x97f10000 0x0 0x2000>;
+		gpu_mem: memory@97f15000 {
+			reg = <0x0 0x97f15000 0x0 0x2000>;
 			no-map;
 		};
 
