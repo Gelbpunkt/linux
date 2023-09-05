@@ -17,6 +17,10 @@
 /delete-node/ &gpu_mem;
 
 / {
+	/*
+	 * Xiaomi Redmi Note 10 Pro (sweet)
+	 * Xiaomi Redmi Note 12 Pro 4G (sweet_k6a)
+	 */
 	model = "Xiaomi Redmi Note 10 Pro";
 	compatible = "xiaomi,sweet", "qcom,sm7150";
 
@@ -89,6 +93,13 @@
 	};
 };
 
+&i2c1 {
+	clock-frequency = <100000>;
+	status = "okay";
+
+	/* ti,bq27z561 (fuel gauge) @ 55 */
+};
+
 &i2c2 {
 	clock-frequency = <100000>;
 	status = "okay";
@@ -102,11 +113,19 @@
 
 	/* awinic,aw882xx (speaker amplifier) @ 34 */
 	/* awinic,aw882xx (speaker amplifier) @ 35 */
+
+	/* foursemi,fs16xx (speaker amplifier) @ 34 */
+	/* foursemi,fs16xx (speaker amplifier) @ 34 */
+
+	/* lionsemi,ln8000-secondary (sec charger) @ 51 */
+	/* ti,bq2597x-slave (sec charger) @66 */
 };
 
 &i2c7 {
 	clock-frequency = <100000>;
 	status = "okay";
+
+	/* focaltech,fts (touchscreen) @ 38 */
 
 	touchscreen: goodix@5d {
 		compatible = "goodix,gt9896";
