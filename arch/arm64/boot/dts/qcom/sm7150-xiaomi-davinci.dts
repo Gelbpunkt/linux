@@ -153,7 +153,16 @@
 	clock-frequency = <100000>;
 	status = "okay";
 
-	/* asahi-kasei,akm09970 (magnetometer) @ 0c */
+	magnetometer: ak09970n@c {
+		compatible = "asahi-kasei,ak09970n";
+		reg = <0x0c>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <93 IRQ_TYPE_EDGE_RISING>;
+		vdd-supply = <&vreg_l8c_1p8>;
+		reset-gpios = <&tlmm 64 GPIO_ACTIVE_HIGH>;
+	};
+
 	/* qcom,smb1390 (charger) @ 10 */
 };
 
