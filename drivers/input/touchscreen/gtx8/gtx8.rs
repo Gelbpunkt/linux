@@ -16,7 +16,7 @@ struct Gtx8 {
     numbers: Vec<i32>,
 }
 
-impl kernel::Module for RustMinimal {
+impl kernel::Module for Gtx8 {
     fn init(_module: &'static ThisModule) -> Result<Self> {
         pr_info!("Rust minimal sample (init)\n");
         pr_info!("Am I built-in? {}\n", !cfg!(MODULE));
@@ -26,11 +26,11 @@ impl kernel::Module for RustMinimal {
         numbers.try_push(108)?;
         numbers.try_push(200)?;
 
-        Ok(RustMinimal { numbers })
+        Ok(Self { numbers })
     }
 }
 
-impl Drop for RustMinimal {
+impl Drop for Gtx8 {
     fn drop(&mut self) {
         pr_info!("My numbers are {:?}\n", self.numbers);
         pr_info!("Rust minimal sample (exit)\n");
