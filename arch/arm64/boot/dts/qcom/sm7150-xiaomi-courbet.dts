@@ -92,6 +92,10 @@
 	status = "okay";
 };
 
+&nfc_default {
+	pins = "gpio31", "gpio36", "gpio100";
+};
+
 &remoteproc_adsp {
 	firmware-name = "qcom/sm7150/courbet/adsp.mbn";
 	status = "okay";

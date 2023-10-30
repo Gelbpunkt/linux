@@ -100,13 +100,6 @@
 	status = "okay";
 };
 
-&i2c2 {
-	clock-frequency = <100000>;
-	status = "okay";
-
-	/* nqx,nq-nci (nfc) @ 28 */
-};
-
 &i2c4 {
 	clock-frequency = <100000>;
 	status = "okay";

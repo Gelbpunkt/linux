@@ -390,6 +390,26 @@
 	status = "okay";
 };
 
+&i2c2 {
+	clock-frequency = <100000>;
+	status = "okay";
+
+	nfc: nfc@28 {
+		compatible = "nxp,nxp-nci-i2c";
+
+		reg = <0x28>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <37 IRQ_TYPE_LEVEL_HIGH>;
+
+		enable-gpios = <&tlmm 12 GPIO_ACTIVE_HIGH>;
+		firmware-gpios = <&tlmm 36 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&nfc_default>;
+	};
+};
+
 &ipa {
 	memory-region = <&ipa_fw_mem>;
 };
@@ -540,6 +560,13 @@
 
 &tlmm {
 	gpio-reserved-ranges = <0 4>, <59 4>;
+
+	nfc_default: nfc-default-state {
+		pins = "gpio12", "gpio31", "gpio36";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
 
 	panel_esd_pin: panel-esd-state {
 		pins = "gpio4";
