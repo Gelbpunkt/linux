@@ -171,6 +171,10 @@
 	compatible = "ss,ea-f10";
 };
 
+&pm6150_vib {
+	status = "okay";
+};
+
 &pm8150l_flash {
 	status = "okay";
 
