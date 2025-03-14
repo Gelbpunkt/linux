@@ -636,6 +636,7 @@ static void __init octeon_rx_tx_delay(int eth, int iface, int port)
 		}
 		break;
 	case CVMX_BOARD_TYPE_UBNT_E100:
+	case CVMX_BOARD_TYPE_UBNT_USG:
 		if (iface == 0 && port <= 2) {
 			_octeon_rx_tx_delay(eth, 0x0, 0x10);
 			return;
