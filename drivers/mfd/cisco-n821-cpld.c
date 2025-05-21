@@ -35,9 +35,8 @@ static const struct regmap_irq n821_cpld_irq_map[] = {
 static const struct regmap_irq_chip n821_cpld_irq_chip = {
   .name            = "n821-cpld-ic",
   .status_base     = N821_CPLD_REG_IRQ_STATUS,
-  .mask_base       = N821_CPLD_REG_IRQ_MASK,
   .ack_base        = N821_CPLD_REG_IRQ_STATUS,
-  .mask_invert     = true,
+  .unmask_base     = N821_CPLD_REG_IRQ_MASK,
   .num_regs        = 1,
   .init_ack_masked = 1,
   .irqs            = n821_cpld_irq_map,
@@ -120,9 +119,8 @@ static int n821_cpld_probe(struct platform_device *pdev)
   return devm_device_add_group(dev, &n821_cpld_group);
 }
 
-static int n821_cpld_remove(struct platform_device *pdev)
+static void n821_cpld_remove(struct platform_device *pdev)
 {
-  return 0;
 }
 
 
