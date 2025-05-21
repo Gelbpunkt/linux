@@ -670,7 +670,7 @@ static int __init octeon_use_image_cmdline(void)
                return 0;
 
        if (replace) {
-               strlcpy(arcs_cmdline, p, sizeof(arcs_cmdline));
+               strncpy(arcs_cmdline, p, sizeof(arcs_cmdline));
        } else {
                strlcat(arcs_cmdline, " ", sizeof(arcs_cmdline));
                strlcat(arcs_cmdline, p, sizeof(arcs_cmdline));
